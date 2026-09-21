@@ -1,0 +1,811 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Trace Scope — Outlier Finder</title>
+<style>
+  :root{
+    --red:#e0322e; --bg:#0b0d10; --panel:#14181d; --panel2:#1b2027;
+    --line:#2a323c; --ink:#eef2f6; --mute:#9aa6b2; --good:#37c281; --gold:#e8b23a; --blue:#4aa8ff;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;}
+  a{color:var(--red);text-decoration:none;}
+  .wrap{max-width:1200px;margin:0 auto;padding:22px 20px 80px;}
+
+  /* header */
+  header{display:flex;align-items:center;gap:16px;flex-wrap:wrap;
+    border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:18px;}
+  .logo{display:flex;align-items:center;gap:12px;}
+  .mark{width:40px;height:40px;border:2px solid var(--red);border-radius:9px;position:relative;flex:none;}
+  .mark::after{content:"";position:absolute;inset:9px;border:2px solid var(--red);border-radius:50%;}
+  .mark::before{content:"";position:absolute;right:5px;bottom:5px;width:13px;height:2px;
+    background:var(--red);transform:rotate(45deg);transform-origin:right;}
+  h1{font-size:22px;margin:0;letter-spacing:3px;}
+  h1 b{color:var(--red);}
+  .tag{font-size:12px;color:var(--mute);letter-spacing:1px;margin-top:2px;}
+  .spacer{flex:1;}
+  .quota{font-size:12px;color:var(--mute);text-align:right;}
+  .quota b{color:var(--ink);}
+
+  /* api key bar */
+  .keybar{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:14px 16px;margin-bottom:16px;display:flex;gap:12px;align-items:center;flex-wrap:wrap;}
+  .keybar .st{font-size:12px;padding:5px 10px;border-radius:20px;white-space:nowrap;}
+  .st.demo{background:rgba(232,178,58,.14);color:var(--gold);border:1px solid rgba(232,178,58,.4);}
+  .st.live{background:rgba(55,194,129,.14);color:var(--good);border:1px solid rgba(55,194,129,.4);}
+  button{background:var(--red);color:#fff;border:0;border-radius:8px;padding:10px 16px;
+    font-size:14px;font-weight:700;cursor:pointer;letter-spacing:.3px;}
+  button.ghost{background:transparent;border:1px solid var(--line);color:var(--ink);font-weight:600;}
+  button.small{padding:7px 12px;font-size:12px;}
+  button:hover{filter:brightness(1.08);}
+
+  /* controls */
+  .controls{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:16px;margin-bottom:16px;}
+  .searchrow{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+  .searchrow input{flex:1;min-width:220px;background:var(--bg);border:1px solid var(--line);
+    color:var(--ink);border-radius:8px;padding:12px 14px;font-size:15px;}
+  .hint{font-size:11px;color:var(--mute);margin:-4px 2px 12px;}
+  .filters{display:flex;gap:16px;flex-wrap:wrap;align-items:flex-end;}
+  .f{display:flex;flex-direction:column;gap:5px;}
+  .f label{font-size:11px;color:var(--mute);letter-spacing:1px;text-transform:uppercase;}
+  .f select,.f input[type=number]{background:var(--bg);border:1px solid var(--line);color:var(--ink);
+    border-radius:8px;padding:8px 10px;font-size:14px;min-width:120px;}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px;}
+  .chip{font-size:12px;background:var(--panel2);border:1px solid var(--line);color:var(--mute);
+    padding:6px 12px;border-radius:20px;cursor:pointer;}
+  .chip:hover{border-color:var(--red);color:var(--ink);}
+
+  /* toolbar over results */
+  .toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:4px 0 14px;}
+  .toolbar .spacer{flex:1;}
+  .toggle{font-size:12px;background:var(--panel2);border:1px solid var(--line);color:var(--mute);
+    padding:8px 13px;border-radius:8px;cursor:pointer;font-weight:600;}
+  .toggle.on{background:rgba(224,50,46,.16);border-color:var(--red);color:#ffd9d8;}
+
+  /* pattern spotter */
+  .patterns{background:var(--panel);border:1px solid var(--line);border-radius:12px;
+    padding:14px 16px;margin-bottom:16px;display:none;}
+  .patterns.open{display:block;}
+  .patterns h3{margin:0 0 8px;font-size:13px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);}
+  .pwords{display:flex;gap:7px;flex-wrap:wrap;}
+  .pword{font-size:12px;background:var(--panel2);border:1px solid var(--line);color:var(--ink);
+    padding:5px 11px;border-radius:20px;cursor:pointer;}
+  .pword:hover{border-color:var(--blue);}
+  .pword b{color:var(--blue);}
+  .pnote{font-size:11px;color:var(--mute);margin-top:10px;line-height:1.6;}
+
+  /* status */
+  .status{font-size:13px;color:var(--mute);margin:6px 2px 16px;min-height:18px;}
+  .status b{color:var(--ink);}
+  .err{color:var(--red);}
+
+  /* results */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;}
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;overflow:hidden;
+    display:flex;flex-direction:column;transition:border-color .15s,transform .15s;}
+  .card:hover{border-color:var(--red);transform:translateY(-2px);}
+  .thumb{position:relative;aspect-ratio:16/9;background:#000;overflow:hidden;cursor:pointer;}
+  .thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+  .badges{position:absolute;top:8px;left:8px;display:flex;gap:6px;flex-wrap:wrap;}
+  .badge{font-size:10px;font-weight:800;letter-spacing:.5px;padding:4px 8px;border-radius:5px;
+    text-transform:uppercase;backdrop-filter:blur(4px);}
+  .b-out{background:rgba(224,50,46,.9);color:#fff;}
+  .b-small{background:rgba(55,194,129,.9);color:#04170e;}
+  .b-fresh{background:rgba(232,178,58,.92);color:#241900;}
+  .b-fast{background:rgba(74,168,255,.92);color:#04121f;}
+  .mult{position:absolute;bottom:8px;right:8px;background:rgba(0,0,0,.78);color:#fff;
+    font-weight:800;font-size:15px;padding:4px 9px;border-radius:6px;border:1px solid var(--red);cursor:help;}
+  .star{position:absolute;top:8px;right:8px;width:30px;height:30px;border-radius:50%;
+    background:rgba(0,0,0,.6);border:1px solid var(--line);color:#fff;font-size:15px;
+    display:flex;align-items:center;justify-content:center;cursor:pointer;backdrop-filter:blur(4px);}
+  .star.on{color:var(--gold);border-color:var(--gold);}
+  .body{padding:12px 14px 14px;display:flex;flex-direction:column;gap:8px;flex:1;}
+  .title{font-size:15px;font-weight:700;line-height:1.3;max-height:60px;overflow:hidden;}
+  .chan{font-size:12px;color:var(--mute);cursor:pointer;}
+  .chan:hover{color:var(--blue);}
+  .stats{display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;margin-top:auto;font-size:12px;}
+  .stat{display:flex;justify-content:space-between;border-top:1px solid var(--line);padding-top:6px;}
+  .stat span{color:var(--mute);}
+  .stat b{color:var(--ink);}
+  .earn b{color:var(--good);}
+  .vpd b{color:var(--blue);}
+  .eng b{color:var(--gold);}
+  .foot{display:flex;justify-content:space-between;align-items:center;margin-top:4px;gap:8px;}
+  .watch{font-size:12px;font-weight:700;color:var(--red);cursor:pointer;}
+  .watch.mute{color:var(--mute);}
+  .empty{text-align:center;color:var(--mute);padding:60px 20px;}
+  .note{font-size:11px;color:var(--mute);margin-top:24px;line-height:1.6;border-top:1px solid var(--line);padding-top:16px;}
+
+  /* modal */
+  .modal{position:fixed;inset:0;background:rgba(0,0,0,.7);display:none;align-items:center;
+    justify-content:center;padding:20px;z-index:50;}
+  .modal.open{display:flex;}
+  .sheet{background:var(--panel);border:1px solid var(--line);border-radius:14px;max-width:680px;
+    width:100%;padding:26px;max-height:85vh;overflow:auto;}
+  .sheet h2{margin:0 0 6px;color:var(--red);}
+  .sheet ol{line-height:1.75;padding-left:20px;}
+  .sheet code{background:var(--bg);padding:2px 6px;border-radius:4px;color:var(--gold);font-size:13px;}
+  .sheet .close{margin-top:18px;}
+  /* channel deep-dive list */
+  .chrow{display:flex;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--line);}
+  .chrow img{width:120px;aspect-ratio:16/9;object-fit:cover;border-radius:6px;flex:none;background:#000;}
+  .chrow .ct{flex:1;min-width:0;}
+  .chrow .ct .t{font-size:13px;font-weight:600;line-height:1.3;max-height:34px;overflow:hidden;}
+  .chrow .ct .m{font-size:11px;color:var(--mute);margin-top:4px;}
+  .chrow .cm{font-weight:800;font-size:14px;padding:3px 8px;border-radius:6px;border:1px solid var(--line);white-space:nowrap;}
+  .chsum{font-size:13px;color:var(--mute);margin:6px 0 14px;line-height:1.6;}
+  .chsum b{color:var(--ink);}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo">
+      <div class="mark"></div>
+      <div>
+        <h1>TRACE <b>SCOPE</b></h1>
+        <div class="tag">TRUE-CRIME OUTLIER FINDER · THE MISSING TRACE</div>
+      </div>
+    </div>
+    <div class="spacer"></div>
+    <div class="quota">
+      <div>API used today: <b id="quota">0</b> / 10,000 units</div>
+      <div style="margin-top:2px;">~<b id="searchesLeft">100</b> searches left</div>
+    </div>
+  </header>
+
+  <!-- API KEY -->
+  <div class="keybar">
+    <div style="display:flex;align-items:center;gap:10px;width:100%;flex-wrap:wrap;">
+      <span id="mode" class="st demo">DEMO MODE</span>
+      <span id="keyinfo" class="st" style="background:rgba(232,178,58,.14);color:var(--gold);border:1px solid rgba(232,178,58,.4);display:none;"></span>
+      <span class="spacer"></span>
+      <button class="ghost" id="howto">How do I get a key?</button>
+    </div>
+    <textarea id="apikeys" placeholder="Paste one or more YouTube API keys — ONE PER LINE. The tool auto-switches to the next key when a key hits its daily limit." autocomplete="off"
+      style="width:100%;min-height:64px;resize:vertical;background:var(--bg);border:1px solid var(--line);color:var(--ink);border-radius:8px;padding:10px 12px;font-size:13px;font-family:monospace;line-height:1.5;"></textarea>
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+      <button id="saveKey">Save Keys</button>
+      <span style="font-size:12px;color:var(--mute);">Multiple keys = more daily scans. Each Google Cloud project gives its own free 10,000 units/day.</span>
+    </div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <div class="searchrow">
+      <input id="q" placeholder="Search a topic — or paste several, separated by commas (e.g. cold case solved, DNA breakthrough, vanished)"/>
+      <button id="go">Scan</button>
+    </div>
+    <div class="hint">Tip: leave blank for an auto true-crime scan · separate multiple angles with commas to merge them into one search.</div>
+    <div class="filters">
+      <div class="f">
+        <label>Max subscribers</label>
+        <select id="maxSubs">
+          <option value="0">Any size</option>
+          <option value="10000">Under 10k</option>
+          <option value="50000" selected>Under 50k</option>
+          <option value="100000">Under 100k</option>
+          <option value="500000">Under 500k</option>
+          <option value="1000000">Under 1M</option>
+        </select>
+      </div>
+      <div class="f">
+        <label>Hide videos over</label>
+        <select id="maxViews">
+          <option value="0" selected>No cap</option>
+          <option value="5000000">5M views</option>
+          <option value="2000000">2M views</option>
+          <option value="1000000">1M views</option>
+          <option value="500000">500k views</option>
+        </select>
+      </div>
+      <div class="f">
+        <label>Published within</label>
+        <select id="within">
+          <option value="0">Any time</option>
+          <option value="7">Last 7 days</option>
+          <option value="30" selected>Last 30 days</option>
+          <option value="90">Last 90 days</option>
+          <option value="365">Last year</option>
+        </select>
+      </div>
+      <div class="f">
+        <label>Video length</label>
+        <select id="dur">
+          <option value="any" selected>Any</option>
+          <option value="short">Shorts (&lt;4m)</option>
+          <option value="medium">4–20 min</option>
+          <option value="long">Long (&gt;20m)</option>
+        </select>
+      </div>
+      <div class="f">
+        <label>Min outlier (×avg)</label>
+        <select id="minMult">
+          <option value="1">1× (all)</option>
+          <option value="2" selected>2×</option>
+          <option value="3">3×</option>
+          <option value="5">5×</option>
+          <option value="10">10× 🔥</option>
+        </select>
+      </div>
+      <div class="f">
+        <label>Sort by</label>
+        <select id="sort">
+          <option value="mult" selected>Outlier score</option>
+          <option value="vpd">Views / day</option>
+          <option value="views">Most views</option>
+          <option value="recent">Newest</option>
+          <option value="earn">Est. earnings</option>
+          <option value="eng">Engagement %</option>
+        </select>
+      </div>
+      <div class="f">
+        <label>Region</label>
+        <select id="region">
+          <option value="" selected>Worldwide</option>
+          <option value="US">United States</option>
+          <option value="GB">United Kingdom</option>
+          <option value="CA">Canada</option>
+          <option value="AU">Australia</option>
+        </select>
+      </div>
+      <div class="f">
+        <label>Language</label>
+        <select id="lang">
+          <option value="" selected>Any</option>
+          <option value="en">English</option>
+          <option value="es">Spanish</option>
+          <option value="pt">Portuguese</option>
+        </select>
+      </div>
+      <div class="f">
+        <label>Est. RPM ($)</label>
+        <input id="rpm" type="number" value="5" min="0" step="0.5" style="width:90px;"/>
+      </div>
+    </div>
+    <div class="chips" id="chips"></div>
+  </div>
+
+  <!-- TOOLBAR -->
+  <div class="toolbar">
+    <div class="toggle" id="tgPatterns">🔤 Title patterns</div>
+    <div class="toggle" id="tgShortlist">⭐ Shortlist (<span id="savedCount">0</span>)</div>
+    <div class="spacer"></div>
+    <button class="ghost small" id="exportCsv">⬇ Export CSV</button>
+  </div>
+
+  <!-- PATTERN SPOTTER -->
+  <div class="patterns" id="patterns">
+    <h3>Winning-title word patterns</h3>
+    <div class="pwords" id="pwords"></div>
+    <div class="pnote" id="pnote"></div>
+  </div>
+
+  <div class="status" id="status"></div>
+  <div class="grid" id="grid"></div>
+
+  <div class="note" id="disclaimer"></div>
+</div>
+
+<!-- HOW-TO MODAL -->
+<div class="modal" id="modal">
+  <div class="sheet">
+    <h2>Get your free YouTube API key (5 min, no card)</h2>
+    <ol>
+      <li>Go to <a href="https://console.cloud.google.com/" target="_blank">console.cloud.google.com</a> and sign in with any Google account.</li>
+      <li>At the top, click the project dropdown → <b>New Project</b> → name it <code>trace-scope</code> → Create.</li>
+      <li>In the search bar type <code>YouTube Data API v3</code> → open it → click <b>Enable</b>.</li>
+      <li>Left menu → <b>APIs &amp; Services</b> → <b>Credentials</b> → <b>+ Create Credentials</b> → <b>API key</b>.</li>
+      <li>Copy the key it shows you. Paste it into the box up top and hit <b>Save Keys</b>. Done!</li>
+    </ol>
+    <p style="color:var(--mute);font-size:13px;">
+      It's free — Google gives you 10,000 units/day (~100 searches). No partnership needed;
+      this is the official, allowed way to read public YouTube data.
+      <b>Want more scans?</b> Make a few Google Cloud <b>projects</b> (each gets its own free
+      10,000/day), create a key in each, and paste them <b>one per line</b> in the box.
+      Trace Scope automatically jumps to the next key the moment one hits its daily limit.
+      After it works, click your key in Google → “Restrict key” → limit it to the
+      <i>YouTube Data API v3</i> so it can't be misused.
+    </p>
+    <button class="close" id="closeModal">Got it</button>
+  </div>
+</div>
+
+<!-- CHANNEL DEEP-DIVE MODAL -->
+<div class="modal" id="chModal">
+  <div class="sheet">
+    <h2 id="chTitle">Channel deep-dive</h2>
+    <div class="chsum" id="chSum">Loading…</div>
+    <div id="chList"></div>
+    <button class="close" id="chClose">Close</button>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   TRACE SCOPE — client-side YouTube outlier finder
+   All public data via official YouTube Data API v3.
+   No server. Your key(s) stored only in THIS browser.
+   ============================================================ */
+
+const DEFAULT_KEYWORDS = [
+  "cold case solved","unsolved disappearance","true crime documentary",
+  "missing person case","cold case files","serial killer documentary",
+  "mysterious disappearance","solved cold case"
+];
+
+const STOPWORDS = new Set(("the a an of to in on for and or but with without you your my his her their "+
+  "this that it is was were are be i he she they we how why what when who where which case true crime "+
+  "story video part full documentary about from into out over under after before").split(/\s+/));
+
+const $ = id => document.getElementById(id);
+
+/* ---------- MULTI-KEY ROTATION ---------- */
+function loadKeys(){
+  const raw = localStorage.getItem('ts_keys') || localStorage.getItem('ts_key') || '';
+  return raw.split(/[\n,]/).map(s=>s.trim()).filter(Boolean);
+}
+let KEYS = loadKeys();
+let keyIdx = 0;
+let quotaUsed = 0;
+
+const hasKeys = ()=> KEYS.length>0;
+const curKey  = ()=> KEYS[keyIdx];
+function isQuotaErr(msg){
+  msg = (msg||'').toLowerCase();
+  return msg.includes('quota') || msg.includes('exceeded') ||
+         msg.includes('daily limit') || msg.includes('rate') ||
+         msg.includes('dailylimit') || msg.includes('userratelimit');
+}
+function nextKey(){
+  if(keyIdx < KEYS.length-1){ keyIdx++; updateKeyInfo(); return true; }
+  return false;
+}
+function updateKeyInfo(){
+  const el=$('keyinfo');
+  if(!hasKeys()){ el.style.display='none'; return; }
+  el.style.display='';
+  el.textContent = KEYS.length>1 ? `Key ${keyIdx+1} of ${KEYS.length}` : `1 key loaded`;
+}
+
+/* ---------- shortlist store ---------- */
+let SAVED = JSON.parse(localStorage.getItem('ts_saved')||'{}');
+let showSaved = false;
+function saveShortlist(){ localStorage.setItem('ts_saved', JSON.stringify(SAVED)); $('savedCount').textContent = Object.keys(SAVED).length; }
+function toggleSave(v){
+  if(SAVED[v.id]) delete SAVED[v.id];
+  else SAVED[v.id] = {id:v.id,title:v.title,channel:v.channel,channelId:v.channelId,
+    thumb:v.thumb,views:v.views,subs:v.subs,avg:v.avg,mult:v.mult,likes:v.likes,
+    comments:v.comments,published:v.published};
+  saveShortlist(); render();
+}
+
+/* ---------- boot ---------- */
+function boot(){
+  if(hasKeys()){ $('apikeys').value = KEYS.join('\n'); setMode(true); }
+  else setMode(false);
+  updateKeyInfo();
+  $('savedCount').textContent = Object.keys(SAVED).length;
+  renderChips();
+  bindEvents();
+  runScan('');
+}
+
+function setMode(live){
+  const m=$('mode');
+  if(live){ m.textContent='LIVE'; m.className='st live'; }
+  else { m.textContent='DEMO MODE'; m.className='st demo'; }
+}
+
+function bindEvents(){
+  $('saveKey').onclick = ()=>{
+    localStorage.setItem('ts_keys', $('apikeys').value);
+    localStorage.removeItem('ts_key');
+    KEYS = loadKeys(); keyIdx = 0;
+    setMode(hasKeys()); updateKeyInfo();
+    $('status').innerHTML = hasKeys()
+      ? `Saved <b>${KEYS.length}</b> key(s). Running a live scan…`
+      : 'Keys cleared — back to demo.';
+    runScan($('q').value.trim());
+  };
+  $('go').onclick = ()=> runScan($('q').value.trim());
+  $('q').addEventListener('keydown', e=>{ if(e.key==='Enter') runScan($('q').value.trim()); });
+  ['maxSubs','maxViews','within','minMult','sort','rpm','dur'].forEach(id=>{
+    $(id).addEventListener('change', ()=> render());
+  });
+  // region/lang/dur change the actual query, so re-scan
+  ['region','lang','dur'].forEach(id=>{
+    $(id).addEventListener('change', ()=> runScan($('q').value.trim()));
+  });
+  $('howto').onclick = ()=> $('modal').classList.add('open');
+  $('closeModal').onclick = ()=> $('modal').classList.remove('open');
+  $('modal').onclick = e=>{ if(e.target===$('modal')) $('modal').classList.remove('open'); };
+  $('chClose').onclick = ()=> $('chModal').classList.remove('open');
+  $('chModal').onclick = e=>{ if(e.target===$('chModal')) $('chModal').classList.remove('open'); };
+
+  $('tgPatterns').onclick = ()=>{
+    const p=$('patterns'); p.classList.toggle('open');
+    $('tgPatterns').classList.toggle('on', p.classList.contains('open'));
+    if(p.classList.contains('open')) drawPatterns();
+  };
+  $('tgShortlist').onclick = ()=>{
+    showSaved = !showSaved;
+    $('tgShortlist').classList.toggle('on', showSaved);
+    render();
+  };
+  $('exportCsv').onclick = exportCsv;
+}
+
+function renderChips(){
+  $('chips').innerHTML = DEFAULT_KEYWORDS.map(k=>`<span class="chip" data-k="${k}">${k}</span>`).join('');
+  document.querySelectorAll('#chips .chip').forEach(c=>{
+    c.onclick = ()=>{ $('q').value=c.dataset.k; runScan(c.dataset.k); };
+  });
+}
+
+function updateQuota(units){
+  quotaUsed += units;
+  $('quota').textContent = quotaUsed.toLocaleString();
+  $('searchesLeft').textContent = Math.max(0, Math.floor((10000-quotaUsed)/100));
+}
+
+/* ---------- data store ---------- */
+let RAW = [];
+
+/* ---------- scan ---------- */
+async function runScan(keyword){
+  if(!hasKeys()){ RAW = DEMO_DATA(); $('status').innerHTML =
+    '<b>Demo data shown.</b> Paste one or more free API keys above to scan live YouTube.'; render(); return; }
+
+  // multiple comma-separated angles → merge; else the auto defaults
+  let kws;
+  if(keyword){ kws = keyword.split(',').map(s=>s.trim()).filter(Boolean).slice(0,4); }
+  else { kws = DEFAULT_KEYWORDS.slice(0,3); }
+
+  $('status').innerHTML = `Scanning YouTube for <b>${kws.join(', ')}</b>…`;
+  $('grid').innerHTML='';
+  try{
+    let vids = [];
+    for(const kw of kws){ vids = vids.concat(await searchKeyword(kw)); }
+    const seen={}; RAW = vids.filter(v=>!seen[v.id] && (seen[v.id]=1));
+    $('status').innerHTML = `Found <b>${RAW.length}</b> videos across ${kws.length} search(es). Filtering…`;
+    render();
+    if($('patterns').classList.contains('open')) drawPatterns();
+  }catch(err){
+    if(err.allKeysDone){
+      $('status').innerHTML = `<span class="err">All ${KEYS.length} key(s) have hit their daily limit.</span> `+
+        `Add another key (new Google Cloud project = another free 10k/day), or come back tomorrow.`;
+    } else {
+      $('status').innerHTML = `<span class="err">Error: ${err.message}</span> — check your key(s).`;
+    }
+  }
+}
+
+async function apiGet(path, params, cost){
+  while(true){
+    params.set('key', curKey());
+    const j = await fetch('https://www.googleapis.com/youtube/v3/'+path+'?'+params)
+                .then(r=>r.json());
+    updateQuota(cost);
+    if(j.error){
+      if(isQuotaErr(j.error.message)){
+        if(nextKey()){
+          $('status').innerHTML = `Key limit reached — switching to key <b>${keyIdx+1}</b> of ${KEYS.length}…`;
+          continue;
+        }
+        const e = new Error('all keys exhausted'); e.allKeysDone = true; throw e;
+      }
+      throw new Error(j.error.message);
+    }
+    return j;
+  }
+}
+
+function mapVideo(v, ch){
+  const c = ch[v.snippet.channelId]||{statistics:{}};
+  const subs = +(c.statistics.subscriberCount||0);
+  const chViews = +(c.statistics.viewCount||0);
+  const chVideos = +(c.statistics.videoCount||1);
+  const avg = Math.max(1, Math.round(chViews/chVideos));
+  const views = +(v.statistics.viewCount||0);
+  return {
+    id:v.id, title:v.snippet.title, channel:v.snippet.channelTitle,
+    channelId:v.snippet.channelId,
+    thumb:(v.snippet.thumbnails.medium||v.snippet.thumbnails.default).url,
+    views, subs, avg, mult:+(views/avg).toFixed(1),
+    likes:+(v.statistics.likeCount||0),
+    comments:+(v.statistics.commentCount||0),
+    published:v.snippet.publishedAt
+  };
+}
+
+async function searchKeyword(kw){
+  const within = +$('within').value;
+  const dur = $('dur').value;
+  const region = $('region').value;
+  const lang = $('lang').value;
+  const p = new URLSearchParams({part:'snippet',type:'video',order:'viewCount',
+    maxResults:'20',q:kw});
+  if(within>0) p.set('publishedAfter', new Date(Date.now()-within*864e5).toISOString());
+  if(dur!=='any') p.set('videoDuration', dur);
+  if(region) p.set('regionCode', region);
+  if(lang) p.set('relevanceLanguage', lang);
+  const sr = await apiGet('search', p, 100);
+  const vidIds = (sr.items||[]).map(i=>i.id.videoId).filter(Boolean);
+  if(!vidIds.length) return [];
+
+  const vr = await apiGet('videos', new URLSearchParams(
+    {part:'statistics,snippet',id:vidIds.join(',')}), 1);
+  const chIds = [...new Set(vr.items.map(v=>v.snippet.channelId))];
+
+  const cr = await apiGet('channels', new URLSearchParams(
+    {part:'statistics,snippet',id:chIds.join(',')}), 1);
+  const ch={}; (cr.items||[]).forEach(c=>ch[c.id]=c);
+
+  return vr.items.map(v=>mapVideo(v, ch));
+}
+
+/* ---------- "more like this" ---------- */
+function moreLikeThis(title){
+  const words = title.toLowerCase().replace(/[^a-z0-9\s]/g,' ').split(/\s+/)
+    .filter(w=>w.length>3 && !STOPWORDS.has(w));
+  const q = words.slice(0,4).join(' ');
+  $('q').value = q;
+  runScan(q);
+}
+
+/* ---------- channel deep-dive ---------- */
+async function channelDeepDive(channelId, channelName){
+  $('chTitle').textContent = channelName;
+  $('chSum').textContent = 'Loading recent uploads…';
+  $('chList').innerHTML = '';
+  $('chModal').classList.add('open');
+  if(!hasKeys()){
+    $('chSum').innerHTML = 'Channel deep-dive needs a live API key. Paste one up top to use this.';
+    return;
+  }
+  try{
+    // pull this channel's top-viewed recent uploads
+    const sr = await apiGet('search', new URLSearchParams(
+      {part:'snippet',type:'video',channelId,order:'viewCount',maxResults:'25'}), 100);
+    const ids = (sr.items||[]).map(i=>i.id.videoId).filter(Boolean);
+    if(!ids.length){ $('chSum').textContent = 'No videos found for this channel.'; return; }
+    const vr = await apiGet('videos', new URLSearchParams(
+      {part:'statistics,snippet',id:ids.join(',')}), 1);
+    const cr = await apiGet('channels', new URLSearchParams(
+      {part:'statistics,snippet',id:channelId}), 1);
+    const ch={}; (cr.items||[]).forEach(c=>ch[c.id]=c);
+    const rows = vr.items.map(v=>mapVideo(v, ch));
+    const avg = rows.length ? Math.round(rows.reduce((s,r)=>s+r.views,0)/rows.length) : 0;
+    const subs = rows[0]?rows[0].subs:0;
+    rows.sort((a,b)=>b.views-a.views);
+    $('chSum').innerHTML = `<b>${fmt(subs)}</b> subs · showing top <b>${rows.length}</b> uploads · `+
+      `these videos average <b>${fmt(avg)}</b> views. Videos beating that average are this channel's proven winners — `+
+      `study their <b>title + thumbnail</b> to reverse-engineer what works.`;
+    $('chList').innerHTML = rows.map(v=>{
+      const beat = v.views>=avg*1.5;
+      const col = beat?'var(--red)':'var(--line)';
+      return `<div class="chrow">
+        <img src="${v.thumb}" alt=""/>
+        <div class="ct">
+          <div class="t">${esc(v.title)}</div>
+          <div class="m">${fmt(v.views)} views · ${daysAgo(v.published)}d ago · ${fmt(v.likes)} likes</div>
+        </div>
+        <div class="cm" style="border-color:${col};color:${beat?'#ffd9d8':'var(--mute)'}">${(v.views/Math.max(1,avg)).toFixed(1)}×</div>
+      </div>`;
+    }).join('');
+  }catch(err){
+    $('chSum').innerHTML = err.allKeysDone
+      ? 'All keys hit their daily limit — try again tomorrow or add another key.'
+      : `<span class="err">Error: ${esc(err.message)}</span>`;
+  }
+}
+
+/* ---------- render (filter + sort + draw) ---------- */
+function computeRow(v){
+  const days = Math.max(0, Math.floor((Date.now() - new Date(v.published))/864e5));
+  const rpm = +$('rpm').value;
+  const vpd = Math.round(v.views/Math.max(1,days||1));
+  const earn = Math.round(v.views/1000*rpm);
+  const eng = v.views>0 ? +(((v.likes+(v.comments||0))/v.views)*100).toFixed(1) : 0;
+  return {...v, days, vpd, earn, eng};
+}
+
+function currentRows(){
+  const source = showSaved ? Object.values(SAVED) : RAW;
+  return source.map(computeRow);
+}
+
+function render(){
+  const maxSubs=+$('maxSubs').value, maxViews=+$('maxViews').value,
+        within=+$('within').value, minMult=+$('minMult').value, sort=$('sort').value;
+
+  let rows = currentRows();
+
+  if(!showSaved){
+    rows = rows.filter(v=>{
+      if(maxSubs>0 && v.subs>maxSubs) return false;
+      if(maxViews>0 && v.views>maxViews) return false;
+      if(within>0 && v.days>within) return false;
+      if(v.mult<minMult) return false;
+      return true;
+    });
+  }
+
+  rows.sort((a,b)=>{
+    if(sort==='views') return b.views-a.views;
+    if(sort==='recent') return a.days-b.days;
+    if(sort==='earn') return b.earn-a.earn;
+    if(sort==='vpd') return b.vpd-a.vpd;
+    if(sort==='eng') return b.eng-a.eng;
+    return b.mult-a.mult;
+  });
+
+  drawStatus(rows.length);
+  drawGrid(rows);
+}
+
+function drawStatus(n){
+  const live = hasKeys();
+  if(showSaved){
+    $('status').innerHTML = `Showing your <b>${n}</b> shortlisted video(s) · click ⭐ Shortlist again to return to results.`;
+    return;
+  }
+  $('status').innerHTML = `Showing <b>${n}</b> outlier video(s) · `+
+    (live?'<span style="color:var(--good)">LIVE data</span>':'<span style="color:var(--gold)">demo data</span>')+
+    ' · adjust the filters above to refine — no extra API cost.';
+}
+
+function fmt(n){ if(n>=1e6) return (n/1e6).toFixed(1)+'M'; if(n>=1e3) return (n/1e3).toFixed(1)+'k'; return n; }
+function daysAgo(p){ return Math.max(0, Math.floor((Date.now()-new Date(p))/864e5)); }
+function esc(s){ return (s||'').replace(/[&<>"]/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function outlierTip(v){
+  return `This video got ${fmt(v.views)} views while the channel averages ${fmt(v.avg)} per video — `+
+    `that's ${v.mult}× normal. High multiples on a small channel = real audience demand you can copy.`;
+}
+
+function drawGrid(rows){
+  if(!rows.length){ $('grid').innerHTML =
+    '<div class="empty">'+(showSaved
+      ? 'Your shortlist is empty. Tap the ⭐ on any video to save it here.'
+      : 'No videos match these filters. Try loosening “Max subscribers”, “Min outlier”, or the view cap.')+'</div>';
+    return; }
+  $('grid').innerHTML = rows.map(v=>{
+    const small = v.subs>0 && v.subs<=50000;
+    const fresh = v.days<=30;
+    const hot = v.mult>=5;
+    const fast = v.vpd>=30000;
+    const badges = [
+      hot?'<span class="badge b-out">Outlier</span>':'',
+      small?'<span class="badge b-small">Small channel</span>':'',
+      fresh?'<span class="badge b-fresh">Fresh</span>':'',
+      fast?'<span class="badge b-fast">Fast</span>':''
+    ].join('');
+    const starred = !!SAVED[v.id];
+    return `
+    <div class="card">
+      <div class="thumb" data-ch="${v.channelId}" data-chn="${esc(v.channel)}">
+        <img src="${v.thumb}" alt="" loading="lazy"/>
+        <div class="badges">${badges}</div>
+        <div class="star ${starred?'on':''}" data-star="${v.id}" title="Shortlist this">${starred?'★':'☆'}</div>
+        <div class="mult" title="${esc(outlierTip(v))}">${v.mult}×</div>
+      </div>
+      <div class="body">
+        <div class="title">${esc(v.title)}</div>
+        <div class="chan" data-ch="${v.channelId}" data-chn="${esc(v.channel)}" title="Deep-dive this channel">${esc(v.channel)} · ${fmt(v.subs)} subs ▸</div>
+        <div class="stats">
+          <div class="stat"><span>Views</span><b>${fmt(v.views)}</b></div>
+          <div class="stat"><span>Ch. avg</span><b>${fmt(v.avg)}</b></div>
+          <div class="stat vpd"><span>Views/day</span><b>${fmt(v.vpd)}</b></div>
+          <div class="stat"><span>Posted</span><b>${v.days}d ago</b></div>
+          <div class="stat earn"><span>Est. $</span><b>$${fmt(v.earn)}</b></div>
+          <div class="stat"><span>Likes</span><b>${fmt(v.likes)}</b></div>
+          <div class="stat"><span>Comments</span><b>${fmt(v.comments||0)}</b></div>
+          <div class="stat eng"><span>Engagement</span><b>${v.eng}%</b></div>
+        </div>
+        <div class="foot">
+          <a class="watch" href="https://youtube.com/watch?v=${v.id}" target="_blank">Watch ▸</a>
+          <span class="watch mute" data-more="${esc(v.title)}">more like this ▸</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // wire up interactions
+  document.querySelectorAll('[data-star]').forEach(el=>{
+    el.onclick = e=>{ e.stopPropagation();
+      const id = el.dataset.star;
+      const v = (showSaved?Object.values(SAVED):RAW).map(computeRow).find(x=>x.id===id);
+      if(v) toggleSave(v);
+    };
+  });
+  document.querySelectorAll('[data-ch]').forEach(el=>{
+    el.onclick = ()=> channelDeepDive(el.dataset.ch, el.dataset.chn);
+  });
+  document.querySelectorAll('[data-more]').forEach(el=>{
+    el.onclick = ()=> moreLikeThis(el.dataset.more);
+  });
+}
+
+/* ---------- pattern spotter ---------- */
+function drawPatterns(){
+  const rows = currentRows();
+  if(!rows.length){ $('pwords').innerHTML='<span class="pnote">Run a scan first.</span>'; $('pnote').textContent=''; return; }
+  const freq={};
+  let hasNumber=0, hasColon=0, total=rows.length;
+  rows.forEach(v=>{
+    if(/\d/.test(v.title)) hasNumber++;
+    if(/[:|\-–—]/.test(v.title)) hasColon++;
+    const words = v.title.toLowerCase().replace(/[^a-z0-9\s]/g,' ').split(/\s+/)
+      .filter(w=>w.length>3 && !STOPWORDS.has(w));
+    [...new Set(words)].forEach(w=> freq[w]=(freq[w]||0)+1);
+  });
+  const top = Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,18);
+  $('pwords').innerHTML = top.map(([w,c])=>
+    `<span class="pword" data-k="${w}">${w} <b>×${c}</b></span>`).join('');
+  document.querySelectorAll('#pwords .pword').forEach(el=>{
+    el.onclick = ()=>{ $('q').value = el.dataset.k; runScan(el.dataset.k); };
+  });
+  $('pnote').innerHTML = `Across these <b>${total}</b> winners: `+
+    `<b>${Math.round(hasNumber/total*100)}%</b> use a number in the title, `+
+    `<b>${Math.round(hasColon/total*100)}%</b> use a colon or dash hook. `+
+    `Click any word to scan that angle. Copy the patterns that repeat — they're proven to pull clicks.`;
+}
+
+/* ---------- CSV export ---------- */
+function exportCsv(){
+  const rows = currentRows();
+  if(!rows.length){ alert('Nothing to export — run a scan or open your shortlist first.'); return; }
+  const head = ['Title','Channel','Subs','Views','Channel avg','Outlier x','Views/day','Days old','Likes','Comments','Engagement %','Est $','URL'];
+  const csv = [head.join(',')].concat(rows.map(v=>[
+    '"'+(v.title||'').replace(/"/g,'""')+'"',
+    '"'+(v.channel||'').replace(/"/g,'""')+'"',
+    v.subs, v.views, v.avg, v.mult, v.vpd, v.days, v.likes, v.comments||0, v.eng, v.earn,
+    'https://youtube.com/watch?v='+v.id
+  ].join(','))).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (showSaved?'trace-scope-shortlist':'trace-scope-results')+'.csv';
+  a.click();
+}
+
+/* ---------- disclaimer ---------- */
+$('disclaimer').innerHTML =
+  '<b>How the outlier score works:</b> a video’s views ÷ that channel’s average views per video. '+
+  'A 5× means it got 5 times the channel’s normal — a strong sign of real demand with beatable competition. '+
+  '<b>Views/day</b> shows momentum (fast climbers). <b>Engagement %</b> = (likes + comments) ÷ views. '+
+  '<b>Est. $ is a rough guess</b> (views ÷ 1000 × your RPM), not real earnings. '+
+  'All figures come from the official public YouTube Data API. Your key(s) stay in this browser only.';
+
+/* ---------- demo data ---------- */
+function DEMO_DATA(){
+  const mk=(title,channel,subs,views,avg,days,id,likes,comments)=>({
+    id,title,channel,channelId:'ch_'+id,subs,views,avg,mult:+(views/avg).toFixed(1),
+    likes:likes||Math.round(views*0.04), comments:comments||Math.round(views*0.006),
+    thumb:'data:image/svg+xml;utf8,'+encodeURIComponent(
+      `<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180"><rect width="320" height="180" fill="#1b2027"/><rect x="8" y="8" width="304" height="164" fill="none" stroke="#e0322e" stroke-width="2" rx="6"/><text x="160" y="96" fill="#9aa6b2" font-family="monospace" font-size="14" text-anchor="middle">TRUE CRIME · DEMO</text></svg>`),
+    published:new Date(Date.now()-days*864e5).toISOString()
+  });
+  return [
+    mk("The Cold Case That Took 30 Years to Solve","Case Files Nightly",12400,842000,68000,9,"demo1"),
+    mk("She Vanished From a Parking Lot — Then DNA Spoke","Trace Records",7800,1230000,54000,4,"demo2"),
+    mk("The Hair That Caught a Killer","Quiet Evidence",34000,415000,90000,21,"demo3"),
+    mk("30 Years Suspected — The Wrong Man","Nightfall True Crime",156000,2100000,320000,14,"demo4"),
+    mk("Abandoned Van, One Fiber, A Confession","The Cold Room",4200,388000,29000,6,"demo5"),
+    mk("Small Town. Big Secret. Solved.","Unsolved No More",22000,675000,71000,45,"demo6"),
+    mk("The Interstate Killer Nobody Named","Redacted Files",89000,930000,140000,60,"demo7"),
+    mk("A Bunny, A Vigil, A 1996 Cold Case","The Missing Trace",1900,204000,15000,2,"demo8")
+  ];
+}
+
+boot();
+</script>
+</body>
+</html>
