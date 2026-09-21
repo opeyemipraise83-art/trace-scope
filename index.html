@@ -139,6 +139,55 @@
   .chrow .cm{font-weight:800;font-size:14px;padding:3px 8px;border-radius:6px;border:1px solid var(--line);white-space:nowrap;}
   .chsum{font-size:13px;color:var(--mute);margin:6px 0 14px;line-height:1.6;}
   .chsum b{color:var(--ink);}
+  /* copy-format modal */
+  .fmt-head{display:flex;gap:14px;margin:4px 0 16px;}
+  .fmt-head img{width:160px;aspect-ratio:16/9;object-fit:cover;border-radius:8px;flex:none;background:#000;}
+  .fmt-head .ft{font-size:14px;font-weight:700;line-height:1.35;}
+  .fmt-head .fm{font-size:12px;color:var(--mute);margin-top:6px;line-height:1.6;}
+  .fsec{border-top:1px solid var(--line);padding:14px 0;}
+  .fsec h4{margin:0 0 8px;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--gold);}
+  .fsec p{margin:0 0 8px;font-size:13px;line-height:1.6;color:var(--ink);}
+  .ftag{display:inline-block;font-size:11px;background:var(--panel2);border:1px solid var(--line);
+    color:var(--mute);padding:4px 9px;border-radius:14px;margin:0 5px 5px 0;}
+  .ftpl{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px;
+    font-size:13px;color:var(--ink);margin:0 0 8px;display:flex;justify-content:space-between;gap:10px;align-items:center;}
+  .ftpl code{color:var(--gold);}
+  .ftpl button{background:var(--panel2);border:1px solid var(--line);color:var(--mute);
+    font-size:11px;font-weight:700;padding:5px 10px;border-radius:6px;flex:none;}
+  .ftpl button:hover{color:#fff;border-color:var(--red);}
+  .fmeta{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:6px;}
+  .fmeta span{font-size:11px;background:var(--panel2);border:1px solid var(--line);
+    color:var(--ink);padding:5px 10px;border-radius:14px;}
+  .fmeta b{color:var(--gold);}
+
+  /* blueprint report */
+  .bp-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:10px 0 4px;}
+  .bp-card{background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:12px 14px;}
+  .bp-card .k{font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:.5px;}
+  .bp-card .val{font-size:18px;font-weight:800;color:var(--ink);margin-top:4px;}
+  .bp-card .val b{color:var(--gold);}
+  .bp-sub{font-size:12px;color:var(--mute);margin-top:3px;}
+  .ideas{margin-top:6px;}
+  .idea{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:11px 13px;
+    margin-bottom:8px;display:flex;justify-content:space-between;gap:12px;align-items:center;}
+  .idea .it{font-size:14px;font-weight:600;color:var(--ink);line-height:1.4;}
+  .idea .iw{font-size:11px;color:var(--mute);margin-top:3px;}
+  .idea button{background:var(--panel2);border:1px solid var(--line);color:var(--mute);
+    font-size:11px;font-weight:700;padding:6px 11px;border-radius:6px;flex:none;cursor:pointer;}
+  .idea button:hover{color:#fff;border-color:var(--red);}
+  .bp-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px;}
+  .skeleton{background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:12px 14px;
+    font-size:13px;line-height:1.7;color:var(--ink);white-space:pre-wrap;margin-top:8px;}
+  .twall{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:8px;}
+  .twall a{display:block;position:relative;border-radius:8px;overflow:hidden;border:1px solid var(--line);}
+  .twall img{width:100%;aspect-ratio:16/9;object-fit:cover;display:block;}
+  .twall .cap{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,.85));
+    color:#fff;font-size:11px;font-weight:700;padding:14px 8px 6px;}
+  .hist{display:flex;gap:8px;flex-wrap:wrap;}
+  .hist .hchip{font-size:12px;background:var(--panel2);border:1px solid var(--line);color:var(--ink);
+    padding:6px 12px;border-radius:20px;cursor:pointer;}
+  .hist .hchip:hover{border-color:var(--red);}
+  .hist .hchip small{color:var(--mute);margin-left:6px;}
 </style>
 </head>
 <body>
@@ -273,8 +322,11 @@
 
   <!-- TOOLBAR -->
   <div class="toolbar">
+    <div class="toggle" id="tgBlueprint">🏆 Winning Blueprint</div>
+    <div class="toggle" id="tgThumbs">🖼️ Thumbnail wall</div>
     <div class="toggle" id="tgPatterns">🔤 Title patterns</div>
     <div class="toggle" id="tgShortlist">⭐ Shortlist (<span id="savedCount">0</span>)</div>
+    <div class="toggle" id="tgHistory">🕘 History</div>
     <div class="spacer"></div>
     <button class="ghost small" id="exportCsv">⬇ Export CSV</button>
   </div>
@@ -285,6 +337,15 @@
     <div class="pwords" id="pwords"></div>
     <div class="pnote" id="pnote"></div>
   </div>
+
+  <!-- WINNING BLUEPRINT -->
+  <div class="patterns" id="blueprint"></div>
+
+  <!-- THUMBNAIL WALL -->
+  <div class="patterns" id="thumbwall"></div>
+
+  <!-- SEARCH HISTORY -->
+  <div class="patterns" id="history"></div>
 
   <div class="status" id="status"></div>
   <div class="grid" id="grid"></div>
@@ -323,6 +384,15 @@
     <div class="chsum" id="chSum">Loading…</div>
     <div id="chList"></div>
     <button class="close" id="chClose">Close</button>
+  </div>
+</div>
+
+<!-- COPY-FORMAT MODAL -->
+<div class="modal" id="fmtModal">
+  <div class="sheet">
+    <h2>📋 Copy this format</h2>
+    <div id="fmtBody"></div>
+    <button class="close" id="fmtClose">Close</button>
   </div>
 </div>
 
@@ -376,6 +446,16 @@ function updateKeyInfo(){
 /* ---------- shortlist store ---------- */
 let SAVED = JSON.parse(localStorage.getItem('ts_saved')||'{}');
 let showSaved = false;
+
+/* ---------- search history store ---------- */
+let HIST = JSON.parse(localStorage.getItem('ts_hist')||'[]');
+function recordHistory(label){
+  if(!label) return;
+  HIST = HIST.filter(h=>h.q!==label);          // de-dupe
+  HIST.unshift({q:label, t:Date.now()});
+  HIST = HIST.slice(0,20);                       // keep last 20
+  localStorage.setItem('ts_hist', JSON.stringify(HIST));
+}
 function saveShortlist(){ localStorage.setItem('ts_saved', JSON.stringify(SAVED)); $('savedCount').textContent = Object.keys(SAVED).length; }
 function toggleSave(v){
   if(SAVED[v.id]) delete SAVED[v.id];
@@ -427,16 +507,34 @@ function bindEvents(){
   $('modal').onclick = e=>{ if(e.target===$('modal')) $('modal').classList.remove('open'); };
   $('chClose').onclick = ()=> $('chModal').classList.remove('open');
   $('chModal').onclick = e=>{ if(e.target===$('chModal')) $('chModal').classList.remove('open'); };
+  $('fmtClose').onclick = ()=> $('fmtModal').classList.remove('open');
+  $('fmtModal').onclick = e=>{ if(e.target===$('fmtModal')) $('fmtModal').classList.remove('open'); };
 
-  $('tgPatterns').onclick = ()=>{
-    const p=$('patterns'); p.classList.toggle('open');
-    $('tgPatterns').classList.toggle('on', p.classList.contains('open'));
-    if(p.classList.contains('open')) drawPatterns();
+  // panels that open/close and draw when opened
+  const panel = (tgId, panelId, drawFn)=>{
+    $(tgId).onclick = ()=>{
+      const p=$(panelId), open=!p.classList.contains('open');
+      // close the other big panels so only one shows at a time
+      ['patterns','blueprint','thumbwall','history'].forEach(x=>{ if(x!==panelId){ $(x).classList.remove('open'); }});
+      ['tgPatterns','tgBlueprint','tgThumbs','tgHistory'].forEach(x=>{ if(x!==tgId) $(x).classList.remove('on'); });
+      p.classList.toggle('open', open);
+      $(tgId).classList.toggle('on', open);
+      if(open) drawFn();
+    };
   };
+  panel('tgBlueprint','blueprint', drawBlueprint);
+  panel('tgThumbs','thumbwall', drawThumbWall);
+  panel('tgPatterns','patterns', drawPatterns);
+  panel('tgHistory','history', drawHistory);
+
   $('tgShortlist').onclick = ()=>{
     showSaved = !showSaved;
     $('tgShortlist').classList.toggle('on', showSaved);
     render();
+    // refresh any open panel to reflect shortlist vs results
+    if($('blueprint').classList.contains('open')) drawBlueprint();
+    if($('thumbwall').classList.contains('open')) drawThumbWall();
+    if($('patterns').classList.contains('open')) drawPatterns();
   };
   $('exportCsv').onclick = exportCsv;
 }
@@ -467,6 +565,7 @@ async function runScan(keyword){
   if(keyword){ kws = keyword.split(',').map(s=>s.trim()).filter(Boolean).slice(0,4); }
   else { kws = DEFAULT_KEYWORDS.slice(0,3); }
 
+  recordHistory(keyword ? keyword : 'auto true-crime scan');
   $('status').innerHTML = `Scanning YouTube for <b>${kws.join(', ')}</b>…`;
   $('grid').innerHTML='';
   try{
@@ -476,6 +575,8 @@ async function runScan(keyword){
     $('status').innerHTML = `Found <b>${RAW.length}</b> videos across ${kws.length} search(es). Filtering…`;
     render();
     if($('patterns').classList.contains('open')) drawPatterns();
+    if($('blueprint').classList.contains('open')) drawBlueprint();
+    if($('thumbwall').classList.contains('open')) drawThumbWall();
   }catch(err){
     if(err.allKeysDone){
       $('status').innerHTML = `<span class="err">All ${KEYS.length} key(s) have hit their daily limit.</span> `+
@@ -516,12 +617,26 @@ function mapVideo(v, ch){
   return {
     id:v.id, title:v.snippet.title, channel:v.snippet.channelTitle,
     channelId:v.snippet.channelId,
-    thumb:(v.snippet.thumbnails.medium||v.snippet.thumbnails.default).url,
+    thumb:(v.snippet.thumbnails.high||v.snippet.thumbnails.medium||v.snippet.thumbnails.default).url,
     views, subs, avg, mult:+(views/avg).toFixed(1),
     likes:+(v.statistics.likeCount||0),
     comments:+(v.statistics.commentCount||0),
+    duration: v.contentDetails ? isoToSec(v.contentDetails.duration) : 0,
+    tags: (v.snippet.tags||[]).slice(0,12),
     published:v.snippet.publishedAt
   };
+}
+/* ISO-8601 duration (PT1H2M3S) -> seconds */
+function isoToSec(iso){
+  const m=(iso||'').match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+  if(!m) return 0;
+  return (+m[1]||0)*3600 + (+m[2]||0)*60 + (+m[3]||0);
+}
+function fmtDur(s){
+  if(!s) return '—';
+  const h=Math.floor(s/3600), m=Math.floor(s%3600/60), sec=s%60;
+  return h? `${h}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`
+         : `${m}:${String(sec).padStart(2,'0')}`;
 }
 
 async function searchKeyword(kw){
@@ -540,7 +655,7 @@ async function searchKeyword(kw){
   if(!vidIds.length) return [];
 
   const vr = await apiGet('videos', new URLSearchParams(
-    {part:'statistics,snippet',id:vidIds.join(',')}), 1);
+    {part:'statistics,snippet,contentDetails',id:vidIds.join(',')}), 1);
   const chIds = [...new Set(vr.items.map(v=>v.snippet.channelId))];
 
   const cr = await apiGet('channels', new URLSearchParams(
@@ -576,7 +691,7 @@ async function channelDeepDive(channelId, channelName){
     const ids = (sr.items||[]).map(i=>i.id.videoId).filter(Boolean);
     if(!ids.length){ $('chSum').textContent = 'No videos found for this channel.'; return; }
     const vr = await apiGet('videos', new URLSearchParams(
-      {part:'statistics,snippet',id:ids.join(',')}), 1);
+      {part:'statistics,snippet,contentDetails',id:ids.join(',')}), 1);
     const cr = await apiGet('channels', new URLSearchParams(
       {part:'statistics,snippet',id:channelId}), 1);
     const ch={}; (cr.items||[]).forEach(c=>ch[c.id]=c);
@@ -711,6 +826,7 @@ function drawGrid(rows){
         </div>
         <div class="foot">
           <a class="watch" href="https://youtube.com/watch?v=${v.id}" target="_blank">Watch ▸</a>
+          <span class="watch" data-fmt="${v.id}" style="color:var(--gold)">📋 Copy format ▸</span>
           <span class="watch mute" data-more="${esc(v.title)}">more like this ▸</span>
         </div>
       </div>
@@ -731,6 +847,152 @@ function drawGrid(rows){
   document.querySelectorAll('[data-more]').forEach(el=>{
     el.onclick = ()=> moreLikeThis(el.dataset.more);
   });
+  document.querySelectorAll('[data-fmt]').forEach(el=>{
+    el.onclick = ()=>{
+      const id = el.dataset.fmt;
+      const v = (showSaved?Object.values(SAVED):RAW).map(computeRow).find(x=>x.id===id);
+      if(v) openFormat(v);
+    };
+  });
+}
+
+/* ============================================================
+   COPY THIS FORMAT — reverse-engineer a winner into a reusable
+   blueprint + fill-in-the-blank templates. Pure analysis, no AI.
+   ============================================================ */
+
+/* detect the title "formula" a winner uses */
+function titleFormula(title){
+  const t = title;
+  const low = t.toLowerCase();
+  const patterns = [];
+  const numMatch = t.match(/\b(\d+)\b/);
+  if(/^\s*\d+\s/.test(t) || /\btop\s*\d+/i.test(t))
+    patterns.push({name:'Listicle / countdown', tpl:`${numMatch?numMatch[1]:'7'} [shocking things] about [TOPIC]`});
+  if(/[:|\-–—]/.test(t)){
+    const parts = t.split(/[:|\-–—]/).map(s=>s.trim()).filter(Boolean);
+    patterns.push({name:'Two-part hook (setup : payoff)', tpl:`[Intriguing setup] — [darker payoff]`});
+  }
+  if(/^(the|a|an)\s/i.test(t) && /(that|who|nobody|no one|everyone)/i.test(low))
+    patterns.push({name:'"The X that Y" curiosity gap', tpl:`The [thing] that [surprising outcome]`});
+  if(/^how\b/i.test(low)) patterns.push({name:'How-it-happened explainer', tpl:`How [subject] [did the impossible thing]`});
+  if(/^why\b/i.test(low)) patterns.push({name:'Why-question hook', tpl:`Why [subject] [unexpected fact]`});
+  if(/\b(vanished|disappeared|missing|gone)\b/i.test(low))
+    patterns.push({name:'Disappearance hook', tpl:`[Name] [vanished/disappeared] [where] — [what cracked it]`});
+  if(/\b(dna|hair|fiber|evidence|clue|confession)\b/i.test(low))
+    patterns.push({name:'One-clue reveal', tpl:`[One small clue] [that solved/broke] the [case]`});
+  if(/\b(solved|caught|cracked|identified|named)\b/i.test(low))
+    patterns.push({name:'Resolution payoff', tpl:`[Cold case] finally [solved/caught] after [N] years`});
+  if(!patterns.length) patterns.push({name:'Plain declarative', tpl:`[Strong noun phrase about your TOPIC]`});
+  return patterns;
+}
+
+/* build blank templates by swapping this title's specifics for slots */
+function titleTemplates(title){
+  let base = title
+    .replace(/\b\d{4}\b/g,'[YEAR]')
+    .replace(/\b\d+\b/g,'[N]');
+  // proper-noun-ish words (Capitalised, not sentence start) -> [NAME]/[PLACE]
+  const words = base.split(' ');
+  const rebuilt = words.map((w,i)=>{
+    if(i>0 && /^[A-Z][a-z]{2,}/.test(w) && !STOPWORDS.has(w.toLowerCase()))
+      return '[NAME/PLACE]';
+    return w;
+  });
+  const t1 = rebuilt.join(' ');
+  // also a "keyword blend" template from the video's strongest words
+  const kw = title.toLowerCase().replace(/[^a-z0-9\s]/g,' ').split(/\s+/)
+    .filter(w=>w.length>3 && !STOPWORDS.has(w)).slice(0,3);
+  const t2 = kw.length? `The [${kw[0]}] [${kw[1]||'twist'}] nobody saw coming` : 'The [angle] nobody saw coming';
+  return [...new Set([t1, t2])];
+}
+
+function durationBucket(sec){
+  if(!sec) return {label:'Unknown length', tip:'Match a typical length for the niche.'};
+  if(sec<240) return {label:'Short (<4 min)', tip:'Fast, punchy, Shorts-adjacent. Hook in first 3 seconds.'};
+  if(sec<1200) return {label:'Standard (4–20 min)', tip:'The YouTube sweet spot — enough for a full story arc + mid-roll ads.'};
+  if(sec<2400) return {label:'Long (20–40 min)', tip:'Deep-dive documentary. Strong for watch-time & multiple ad breaks.'};
+  return {label:'Epic (40 min+)', tip:'Compilation / multi-case. Great retention if the story sustains it.'};
+}
+
+function openFormat(v){
+  const forms = titleFormula(v.title);
+  const tpls  = titleTemplates(v.title);
+  const dur   = durationBucket(v.duration);
+  const capsWords = (v.title.match(/\b[A-Z]{2,}\b/g)||[]).length;
+  const hasNumber = /\d/.test(v.title);
+  const hasEmoji = /[\u{1F000}-\u{1FAFF}\u{2600}-\u{27BF}]/u.test(v.title);
+  const titleLen = v.title.length;
+
+  const copyBtn = (txt)=>`<button onclick="navigator.clipboard&&navigator.clipboard.writeText(this.dataset.c);this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1200)" data-c="${esc(txt)}">Copy</button>`;
+
+  $('fmtBody').innerHTML = `
+    <div class="fmt-head">
+      <img src="${v.thumb}" alt=""/>
+      <div>
+        <div class="ft">${esc(v.title)}</div>
+        <div class="fm">${esc(v.channel)} · ${fmt(v.subs)} subs · <b style="color:var(--red)">${v.mult}× outlier</b><br>
+          ${fmt(v.views)} views · ${fmt(v.vpd)}/day · ${v.eng}% engagement · ${v.days}d old</div>
+      </div>
+    </div>
+
+    <div class="fsec">
+      <h4>Why this worked (the proof)</h4>
+      <p>This video pulled <b>${v.mult}×</b> the channel's normal views — that's not luck, it's a format the audience
+      clearly wanted. On a ${fmt(v.subs)}-sub channel, that means the <b>topic + packaging</b> did the heavy lifting,
+      and you can copy the packaging.</p>
+    </div>
+
+    <div class="fsec">
+      <h4>Title formula it uses</h4>
+      ${forms.map(f=>`<p>• <b>${f.name}</b><br><span style="color:var(--mute)">Pattern:</span> <code style="color:var(--gold)">${esc(f.tpl)}</code></p>`).join('')}
+    </div>
+
+    <div class="fsec">
+      <h4>Steal-it title templates (swap the [brackets])</h4>
+      ${tpls.map(t=>`<div class="ftpl"><code>${esc(t)}</code>${copyBtn(t)}</div>`).join('')}
+    </div>
+
+    <div class="fsec">
+      <h4>Packaging checklist</h4>
+      <div class="fmeta">
+        <span>Title length: <b>${titleLen}</b> chars ${titleLen<=60?'✅':'(trim toward ≤60 so it is not cut off)'}</span>
+        <span>Number in title: <b>${hasNumber?'Yes ✅':'No'}</b></span>
+        <span>ALL-CAPS word: <b>${capsWords?'Yes ('+capsWords+') ✅':'No'}</b></span>
+        <span>Emoji: <b>${hasEmoji?'Yes':'No'}</b></span>
+      </div>
+      <p style="color:var(--mute)">Copy the boxes marked ✅ — those are the click-drivers this winner used.
+      ${!hasNumber?'Consider adding a number (Top 5 / 3 clues / 27 years) — it usually lifts CTR.':''}</p>
+    </div>
+
+    <div class="fsec">
+      <h4>Length to match</h4>
+      <p><b>${fmtDur(v.duration)}</b> — ${dur.label}. ${dur.tip}</p>
+    </div>
+
+    ${v.tags && v.tags.length ? `<div class="fsec">
+      <h4>Tags / keywords it targets</h4>
+      <div>${v.tags.map(t=>`<span class="ftag">${esc(t)}</span>`).join('')}</div>
+      <p style="color:var(--mute);margin-top:8px">These are the search terms it's optimised for — reuse the relevant ones in your description &amp; tags.</p>
+    </div>` : ''}
+
+    <div class="fsec">
+      <h4>Thumbnail cues to study</h4>
+      <p>Open the video and note: <b>face vs. no face</b>, big-text word count (usually 1–4 words),
+      colour contrast, and whether it shows the <b>victim/subject, a location, or an object clue</b>.
+      Recreate the <i>structure</i>, never copy the actual image.</p>
+    </div>
+
+    <div class="fsec" style="border-bottom:1px solid var(--line)">
+      <h4>Your next video, from this winner</h4>
+      <p>1. Pick <b>your</b> case/topic in the same lane.<br>
+         2. Use one steal-it title template above.<br>
+         3. Match the length bucket (${dur.label}).<br>
+         4. Rebuild the thumbnail structure.<br>
+         5. Open the hook the same way (${forms[0].name.toLowerCase()}).</p>
+    </div>
+  `;
+  $('fmtModal').classList.add('open');
 }
 
 /* ---------- pattern spotter ---------- */
@@ -756,6 +1018,194 @@ function drawPatterns(){
     `<b>${Math.round(hasNumber/total*100)}%</b> use a number in the title, `+
     `<b>${Math.round(hasColon/total*100)}%</b> use a colon or dash hook. `+
     `Click any word to scan that angle. Copy the patterns that repeat — they're proven to pull clicks.`;
+}
+
+/* ============================================================
+   WINNING BLUEPRINT — analyse ALL current winners together and
+   turn them into stats + ready-to-use VIDEO IDEAS + a script
+   skeleton. Free, no AI — just aggregation of real data.
+   ============================================================ */
+
+/* pull the strongest content words across all rows, ranked */
+function topWords(rows, n){
+  const freq={};
+  rows.forEach(v=>{
+    [...new Set(v.title.toLowerCase().replace(/[^a-z0-9\s]/g,' ').split(/\s+/)
+      .filter(w=>w.length>3 && !STOPWORDS.has(w)))].forEach(w=> freq[w]=(freq[w]||0)+1);
+  });
+  return Object.entries(freq).sort((a,b)=>b[1]-a[1]).slice(0,n).map(x=>x[0]);
+}
+
+/* the dominant title formula across the set */
+function dominantFormula(rows){
+  const tally={};
+  rows.forEach(v=> titleFormula(v.title).forEach(f=>{ tally[f.name]=(tally[f.name]||0)+1; }));
+  const top = Object.entries(tally).sort((a,b)=>b[1]-a[1])[0];
+  return top? top[0] : 'The X that Y curiosity gap';
+}
+
+/* median helper */
+function median(arr){ if(!arr.length) return 0; const s=[...arr].sort((a,b)=>a-b); const m=Math.floor(s.length/2);
+  return s.length%2? s[m] : Math.round((s[m-1]+s[m])/2); }
+
+/* GENERATE video ideas by blending proven words + winning formulas */
+function generateIdeas(rows){
+  const words = topWords(rows, 8);
+  const w = (i)=> words[i] || ['case','clue','suspect','witness','confession','trial'][i%6];
+  const num = median(rows.map(v=>{ const m=v.title.match(/\b(\d{1,3})\b/); return m?+m[1]:0; }).filter(Boolean)) || 7;
+  // templates seeded with the actual hot words from the analysed winners
+  const raw = [
+    `The ${cap(w(0))} That ${cap(w(1))} Nobody Could Explain`,
+    `${num} ${cap(w(2))} Clues That Cracked the ${cap(w(0))} Case`,
+    `How One ${cap(w(3))} Solved a ${cap(w(0))} After ${num*3} Years`,
+    `The ${cap(w(1))} ${cap(w(4))}: Cold Case Finally Solved`,
+    `She ${cap(w(5)||'Vanished')} — Then the ${cap(w(2))} Spoke`,
+    `The ${cap(w(0))} Case Everyone Got Wrong`,
+    `Why the ${cap(w(1))} ${cap(w(3))} Was Never Named`,
+    `Inside the ${cap(w(0))} Mystery That ${cap(w(4))} the Town`,
+    `The Small Clue in the ${cap(w(2))} Case That Changed Everything`,
+    `${num} Years. One ${cap(w(3))}. The Truth About ${cap(w(0))}`
+  ];
+  // score each idea by how many proven words it reuses (higher = closer to what's working)
+  const proven = new Set(words);
+  return raw.map(t=>{
+    const hits = t.toLowerCase().split(/\s+/).filter(x=>proven.has(x.replace(/[^a-z]/g,''))).length;
+    return {title:t, score:hits};
+  }).sort((a,b)=>b.score-a.score);
+}
+function cap(s){ return (s||'').charAt(0).toUpperCase()+(s||'').slice(1); }
+
+/* best day/time from publish dates of the winners */
+function bestTiming(rows){
+  const DAYS=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  const dc={}, hc={};
+  rows.forEach(v=>{ const d=new Date(v.published); dc[d.getDay()]=(dc[d.getDay()]||0)+1; hc[d.getHours()]=(hc[d.getHours()]||0)+1; });
+  const day = Object.entries(dc).sort((a,b)=>b[1]-a[1])[0];
+  const hour= Object.entries(hc).sort((a,b)=>b[1]-a[1])[0];
+  return {
+    day: day? DAYS[+day[0]] : '—',
+    hour: hour? (`${String(hour[0]).padStart(2,'0')}:00 UTC`) : '—'
+  };
+}
+
+/* recurring SUBJECTS = 2-word phrases that repeat (topic-level, not single words) */
+function trendingTopics(rows){
+  const bi={};
+  rows.forEach(v=>{
+    const ws=v.title.toLowerCase().replace(/[^a-z0-9\s]/g,' ').split(/\s+/).filter(w=>w.length>3 && !STOPWORDS.has(w));
+    for(let i=0;i<ws.length-1;i++){ const p=ws[i]+' '+ws[i+1]; bi[p]=(bi[p]||0)+1; }
+  });
+  return Object.entries(bi).filter(x=>x[1]>1).sort((a,b)=>b[1]-a[1]).slice(0,10);
+}
+
+function scriptSkeleton(topic){
+  return (
+`HOOK (0:00–0:15)  →  "${topic}" — open on the single most shocking fact. No intro, no "hey guys."
+SETUP (0:15–1:30)  →  Who, where, when. Ground the viewer: the victim/subject as a real person.
+ESCALATION (1:30–4:00)  →  What went wrong, timeline of events, rising questions. Tease "but one detail didn't add up…"
+THE CLUE / TURN (4:00–6:00)  →  The piece of evidence or twist. Slow down here — this is the retention spike.
+THE REVEAL (6:00–8:30)  →  Who/what/why. Pay off every question you raised. Show the resolution.
+AFTERMATH + CTA (8:30–end)  →  Sentencing / where they are now / unanswered piece. Then: "If you want the case that's even stranger — watch this."`);
+}
+
+function drawBlueprint(){
+  const rows = currentRows();
+  const el = $('blueprint');
+  if(!rows.length){ el.innerHTML='<h3>🏆 Winning Blueprint</h3><p class="pnote">Run a scan first — then this builds a full blueprint from the winners.</p>'; return; }
+
+  const total=rows.length;
+  const medLen = median(rows.map(v=>v.duration).filter(Boolean));
+  const medViews = median(rows.map(v=>v.views));
+  const withNum = Math.round(rows.filter(v=>/\d/.test(v.title)).length/total*100);
+  const medTitleLen = median(rows.map(v=>v.title.length));
+  const formula = dominantFormula(rows);
+  const timing = bestTiming(rows);
+  const topics = trendingTopics(rows);
+  const ideas = generateIdeas(rows);
+  const topWordList = topWords(rows, 10);
+  const bucket = durationBucket(medLen);
+
+  el.innerHTML = `
+    <h3>🏆 Winning Blueprint — built from ${total} current winners</h3>
+
+    <div class="bp-grid">
+      <div class="bp-card"><div class="k">Best title formula</div><div class="val" style="font-size:14px">${formula}</div></div>
+      <div class="bp-card"><div class="k">Ideal length</div><div class="val"><b>${fmtDur(medLen)}</b></div><div class="bp-sub">${bucket.label}</div></div>
+      <div class="bp-card"><div class="k">Use a number?</div><div class="val"><b>${withNum}%</b> do</div><div class="bp-sub">${withNum>=50?'Yes — add one':'Optional'}</div></div>
+      <div class="bp-card"><div class="k">Title length</div><div class="val"><b>${medTitleLen}</b> chars</div><div class="bp-sub">keep ≤60</div></div>
+      <div class="bp-card"><div class="k">Best day to post</div><div class="val" style="font-size:15px"><b>${timing.day}</b></div><div class="bp-sub">~${timing.hour}</div></div>
+      <div class="bp-card"><div class="k">Typical winner</div><div class="val"><b>${fmt(medViews)}</b></div><div class="bp-sub">median views</div></div>
+    </div>
+
+    <div style="border-top:1px solid var(--line);margin-top:14px;padding-top:14px">
+      <h3 style="color:var(--red)">💡 Video ideas that fit what's working right now</h3>
+      <div class="pnote" style="margin:0 0 10px">Built by blending the proven title formula with the exact hot words from these winners. Ideas reusing more proven words are listed first. Tweak the specifics to YOUR case.</div>
+      <div class="ideas">
+        ${ideas.map(i=>`<div class="idea">
+          <div><div class="it">${esc(i.title)}</div><div class="iw">${i.score>0? '♻ reuses '+i.score+' proven word'+(i.score>1?'s':'') : 'fresh angle'}</div></div>
+          <button onclick="navigator.clipboard&&navigator.clipboard.writeText(this.dataset.c);this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1200)" data-c="${esc(i.title)}">Copy</button>
+        </div>`).join('')}
+      </div>
+      <div class="bp-actions">
+        <button class="ghost small" id="bpCopyAll">⬇ Copy all 10 ideas</button>
+        <button class="ghost small" id="bpScript">📝 Script skeleton for idea #1</button>
+      </div>
+      <div id="bpScriptBox"></div>
+    </div>
+
+    ${topics.length? `<div style="border-top:1px solid var(--line);margin-top:14px;padding-top:14px">
+      <h3>🔥 Trending subjects (repeating across winners)</h3>
+      <div class="pwords">${topics.map(([p,c])=>`<span class="pword" data-k="${esc(p)}">${esc(p)} <b>×${c}</b></span>`).join('')}</div>
+      <div class="pnote" style="margin-top:8px">These 2-word subjects show up in multiple winners — the audience wants more of them. Click to scan one.</div>
+    </div>`:''}
+
+    <div style="border-top:1px solid var(--line);margin-top:14px;padding-top:14px">
+      <h3>🧲 Power-words to put in your titles</h3>
+      <div class="pwords">${topWordList.map(w=>`<span class="pword" data-k="${esc(w)}">${esc(w)}</span>`).join('')}</div>
+    </div>
+  `;
+
+  // wire idea-word/topic chips to scan
+  el.querySelectorAll('.pword').forEach(elm=>{ elm.onclick=()=>{ $('q').value=elm.dataset.k; runScan(elm.dataset.k); }; });
+  $('bpCopyAll').onclick = ()=>{
+    const txt = ideas.map((i,n)=>`${n+1}. ${i.title}`).join('\n');
+    if(navigator.clipboard) navigator.clipboard.writeText(txt);
+    $('bpCopyAll').textContent='Copied all!'; setTimeout(()=>$('bpCopyAll').textContent='⬇ Copy all 10 ideas',1400);
+  };
+  $('bpScript').onclick = ()=>{
+    $('bpScriptBox').innerHTML = `<div class="skeleton">${esc(scriptSkeleton(ideas[0].title))}</div>`+
+      `<div class="bp-actions"><button class="ghost small" id="bpScriptCopy">Copy script skeleton</button></div>`;
+    $('bpScriptCopy').onclick=()=>{ if(navigator.clipboard) navigator.clipboard.writeText(scriptSkeleton(ideas[0].title));
+      $('bpScriptCopy').textContent='Copied!'; setTimeout(()=>$('bpScriptCopy').textContent='Copy script skeleton',1200); };
+  };
+}
+
+/* ---------- thumbnail wall ---------- */
+function drawThumbWall(){
+  const rows = currentRows().sort((a,b)=>b.mult-a.mult);
+  const el=$('thumbwall');
+  if(!rows.length){ el.innerHTML='<h3>🖼️ Thumbnail wall</h3><p class="pnote">Run a scan first.</p>'; return; }
+  el.innerHTML = `<h3>🖼️ Thumbnail wall — study the visual pattern</h3>
+    <div class="pnote" style="margin-bottom:6px">All winning thumbnails side by side. Look for the shared recipe: faces vs none, big-text word count, colour, and what object/subject they show. Recreate the structure — never the image.</div>
+    <div class="twall">${rows.map(v=>`<a href="https://youtube.com/watch?v=${v.id}" target="_blank" title="${esc(v.title)}">
+      <img src="${v.thumb}" alt="" loading="lazy"/><div class="cap">${v.mult}× · ${fmt(v.views)}</div></a>`).join('')}</div>`;
+}
+
+/* ---------- search history ---------- */
+function drawHistory(){
+  const el=$('history');
+  if(!HIST.length){ el.innerHTML='<h3>🕘 History</h3><p class="pnote">Your recent scans will appear here so you can track a niche over time.</p>'; return; }
+  el.innerHTML = `<h3>🕘 Recent scans — click to re-run</h3>
+    <div class="hist">${HIST.map(h=>{
+      const mins=Math.round((Date.now()-h.t)/60000);
+      const ago = mins<60? mins+'m ago' : Math.round(mins/60)+'h ago';
+      return `<span class="hchip" data-k="${esc(h.q)}">${esc(h.q)}<small>${ago}</small></span>`;
+    }).join('')}
+    <span class="hchip" id="histClear" style="border-color:var(--red);color:var(--red)">clear all ✕</span></div>`;
+  el.querySelectorAll('.hchip[data-k]').forEach(c=>{ c.onclick=()=>{
+    const q=c.dataset.k; if(q==='auto true-crime scan'){ $('q').value=''; runScan(''); } else { $('q').value=q; runScan(q); }
+  };});
+  $('histClear').onclick=()=>{ HIST=[]; localStorage.removeItem('ts_hist'); drawHistory(); };
 }
 
 /* ---------- CSV export ---------- */
@@ -789,6 +1239,7 @@ function DEMO_DATA(){
   const mk=(title,channel,subs,views,avg,days,id,likes,comments)=>({
     id,title,channel,channelId:'ch_'+id,subs,views,avg,mult:+(views/avg).toFixed(1),
     likes:likes||Math.round(views*0.04), comments:comments||Math.round(views*0.006),
+    duration:600+Math.round(views%900), tags:['true crime','cold case','solved','documentary'],
     thumb:'data:image/svg+xml;utf8,'+encodeURIComponent(
       `<svg xmlns="http://www.w3.org/2000/svg" width="320" height="180"><rect width="320" height="180" fill="#1b2027"/><rect x="8" y="8" width="304" height="164" fill="none" stroke="#e0322e" stroke-width="2" rx="6"/><text x="160" y="96" fill="#9aa6b2" font-family="monospace" font-size="14" text-anchor="middle">TRUE CRIME · DEMO</text></svg>`),
     published:new Date(Date.now()-days*864e5).toISOString()
